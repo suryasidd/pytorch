@@ -24,7 +24,7 @@ def openvino(gm, example_inputs, **kwargs):
         from openvino.runtime import Core, Type, PartialShape
         executor_parameters = None
         inputs_reversed = False
-        if "OPENVINO_TORCH_MODEL_CACHING" in opts.keys():
+        if "OPENVINO_TORCH_MODEL_CACHING" in opts.keys() and opts["OPENVINO_TORCH_MODEL_CACHING"]:
             # Create a hash to be used for caching
             model_hash_str = sha256(gm.code.encode('utf-8')).hexdigest()
             executor_parameters = {"model_hash_str": model_hash_str}
@@ -35,6 +35,7 @@ def openvino(gm, example_inputs, **kwargs):
             if os.path.isfile(maybe_fs_cached_name + ".xml") and os.path.isfile(maybe_fs_cached_name + ".bin"):
                 # Model is fully supported and already cached. Run the cached OV model directly.
                 compiled_model = openvino_compile_cached_model(maybe_fs_cached_name, *example_inputs)
+
                 def _call(*args):
                     res = execute_cached(compiled_model, *args)
                     return res
